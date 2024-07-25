@@ -26,13 +26,9 @@ Use the provided functions to log payloads and attach logs to messages in the mo
 
 Detailed Information you find in our [Wiki](https://github.com/stefanzimara/vIntegrationTools/wiki).
 
-## Contributing
-
-We welcome contributions! Please see our contributing guidelines for more information.
-
 ## License
 
-This project is licensed under the AGPL License - see the LICENSE file for details.
+This project is licensed under the AGPL License - see the [LICENSE](https://github.com/stefanzimara/vIntegrationTools/blob/main/LICENSE) file for details.
 
 ## Contact
 

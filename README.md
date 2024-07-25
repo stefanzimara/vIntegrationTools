@@ -23,13 +23,8 @@ Follow the specific setup instructions for each tool/script in their respective 
 Payload Logging Library
 Add vIntegrationTools-Logging.groovy to your script collection in the SAP Integration Suite.
 Use the provided functions to log payloads and attach logs to messages in the monitoring system.
-Example
-groovy
-Code kopieren
-import com.valcoba.logging.PayloadLogger
 
-def logger = new PayloadLogger()
-logger.logPayload(message)
+Detailed Information you find in our [Wiki](https://github.com/stefanzimara/vIntegrationTools/wiki).
 
 ## Contributing
 

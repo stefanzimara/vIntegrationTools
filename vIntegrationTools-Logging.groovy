@@ -280,8 +280,10 @@ def Message select_attachment(Message message) {
 def Message log(String prefix, Message message,boolean logPayload, boolean logHeaders, boolean logProperties, boolean logSysEnv) {
 
     def headers = message.getHeaders();
-    def properties = properties.getProperties();
-    boolean property_ENABLE_LOGGING = properties.get("EnableLogging", "TRUE") as boolean;
+    def properties = message.getProperties();
+
+    def enableLoggingValue = properties.get("EnableLogging", "TRUE");
+    boolean property_ENABLE_LOGGING = enableLoggingValue?.toString()?.equalsIgnoreCase("true");
 
     if (property_ENABLE_LOGGING) {
         

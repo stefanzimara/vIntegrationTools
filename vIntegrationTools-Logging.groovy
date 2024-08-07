@@ -25,66 +25,101 @@ import com.sap.gateway.ip.core.customdev.util.Message;
 // Call Methods
 // -----------------------------------------------------------
 def Message processData(Message message) {
-    log("Default", message, true, true, true, true);
+    log("Default", message, true, true, true, true, "ALL");
     return message
 }
 
 def Message logHeaderandProperties(Message message) {
-    log("Header_and_Properties", message, false, true, true, true);
+    log("Header_and_Properties", message, false, true, true, true, "ALL");
     return message
 }
 
 def Message payload_logger_after_mapping(Message message) {
-    log("After_Mapping", message, true, false, false, false);
+    log("After_Mapping", message, true, false, false, false, "DEBUG");
     return message
 }
 
 def Message payload_logger_before_mapping(Message message) {
-    log("Before_Mapping", message, true, false, false, false);
+    log("Before_Mapping", message, true, false, false, false, "DEBUG");
     return message
 }
 
 def Message payload_source(Message message) {
-    log("Source", message, true, true, true, true);
+    log("Source", message, true, true, true, true, "ALL");
     return message
 }
 
 def Message payload_redirect(Message message) {
-    log("Redirect Message", message, true, true, true, true);
+    log("Redirect Message", message, true, true, true, true, "ERROR");
     return message
 }
 
 def Message payload_response(Message message) {
-    log("Response", message, true, true, true, true);
+    log("Response", message, true, true, true, true, "INFO");
     return message
 }
 
 def Message payload_sent(Message message) {
-    log("Sent Message", message, true, false, false, false);
+    log("Sent Message", message, true, false, false, false, "INFO");
     return message
 }
 
 def Message log_Info(Message message) {
-    log("Info", message, true, false, false, false);
+    log("Info", message, true, false, false, false, "INFO");
     return message
 }
 
 def Message logExceptionMessage(Message message) {
-   log("Exception", message, true, false, false, false);
+   log("Exception", message, true, false, false, false, "ALL");
     return message
 }
 
 // -----------------------------------------------------------
 // Main
 // -----------------------------------------------------------
-def Message log(String prefix, Message message,boolean logPayload, boolean logHeaders, boolean logProperties, boolean logSysEnv) {
+def Message log(String prefix, Message message,boolean logPayload, boolean logHeaders, boolean logProperties, boolean logSysEnv, String logLevel = "") {
 
+    // Define Log Lecels
+    def levelMap = [:]
+
+    levelMap["ALL"] = 0
+    levelMap["TRACE"] = 0
+    levelMap["TRUE"] = 0
+
+    levelMap["DEBUG"] = 1
+    levelMap["INFO"] = 5
+    levelMap["ERROR"] = 6
+
+    levelMap["NONE"] = 7
+    levelMap["FALSE"] = 7
+
+    boolean property_ENABLE_LOGGING = false;
+
+    //Read Prperties
     def headers = message.getHeaders();
     def properties = message.getProperties();
     
-    def enableLoggingValue = properties.get("log.EnableLogging", "TRUE");
-    boolean property_ENABLE_LOGGING = enableLoggingValue?.toString()?.equalsIgnoreCase("true");
+    def enableLoggingValue = properties.get("log.EnableLogging", "TRUE").toUpperCase();
+    
+    if (logLevel != "" && enableLoggingValue != "TRUE" && enableLoggingValue != "FALSE") {
+        
+        if (levelMap.containsKey(logLevel.toUpperCase())) {
+        
+            prefix += "_" + logLevel
+        
+            if(levelMap[enableLoggingValue] >= levelMap[logLevel.toUpperCase()]) {
+                property_ENABLE_LOGGING = true;
+            }
+        
+        } else {
+            property_ENABLE_LOGGING = enableLoggingValue?.toString()?.equalsIgnoreCase("true");   
+        }
 
+    } else {    
+        property_ENABLE_LOGGING = enableLoggingValue?.toString()?.equalsIgnoreCase("true");   
+    }
+
+    //Prepare Log Attachment
     def messageLog = messageLogFactory.getMessageLog(message);
 
     if (property_ENABLE_LOGGING) {
@@ -109,7 +144,7 @@ def Message log(String prefix, Message message,boolean logPayload, boolean logHe
         def attachmentName = determineAttachmentName(property_prefix, "");
 
         //Note LogeLevel
-        def logLevel = message.getProperty("SAP_MPL_LogLevel_Overall");
+        def flowLogLevel = message.getProperty("SAP_MPL_LogLevel_Overall");
     
         //Prepare content, Header Log
         if(logHeaders) {
@@ -206,6 +241,9 @@ def Message logException(Message message) {
        // Call methode to store Log
        storeLog(message);
 }
+
+
+
 
 
 

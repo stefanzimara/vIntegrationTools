@@ -16,8 +16,9 @@
  * https://github.com/stefanzimara/vIntegrationTools
  *
  * History:
- * - 2025-01-01: Initial version created by Stefan Zimara.
- *
+ * - 2025-01-01: Initial version created by Stefan Zimara
+ * - 2025-01-10: DB Export integrated
+ * 
  * Usage:
  * Take care that PHP is available on your system
  * Run script via command promt e.g. 
@@ -33,9 +34,11 @@
 $i = 1;
 
 include("settings.php");
-include("runs.php");
 
-if(!isset($run_id)) {
+if (file_exists("runs.php")) {
+    include("runs.php");
+} else {
+    // Datei existiert nicht, run_id auf 1 setzen
     $run_id = 1;
 }
 
@@ -68,6 +71,19 @@ if ($argc == 1 || isset($options['h']) || isset($options['help'])) {
     
     exit;
 
+}
+
+//Check Settings / Parameters
+$allowedFormats = ['json', 'db'];
+
+if (!in_array(strtolower(OUTPUT_FORMAT), array_map('strtolower', $allowedFormats), true)) {
+    echo "Invalid Output format: " . OUTPUT_FORMAT;
+    writeLog("ERROR", "Invalid Output format: " . OUTPUT_FORMAT);
+    exit(1);
+}
+
+if (strtolower(OUTPUT_FORMAT) == "db") {
+    validateDbSettings();
 }
 
 // Load defined configuration or 
@@ -116,6 +132,20 @@ foreach($config as $system) {
     
     writeLog("INFO","Process: ".$system["system"]);
     
+    //Prepare DB Tables if neccersary
+    if (strtolower(OUTPUT_FORMAT) == "db") {
+        $delete = "delete from v_IntegrationRuntimeArtifacts where owner = '".$system["owner"]."' and system = '".$system["system"]."'";
+        executeQuery($delete);
+        
+        $delete = "delete from v_IntegrationPackages where owner = '".$system["owner"]."' and system = '".$system["system"]."'";
+        executeQuery($delete);
+        
+        $delete = "delete from v_IntegrationDesigntimeArtifacts where owner = '".$system["owner"]."' and system = '".$system["system"]."'";
+        executeQuery($delete);
+        
+    }
+    
+    
     // Timestamp for datanames
     $timestamp = date("Y-m-d_H-i-s");
         
@@ -156,6 +186,7 @@ foreach($config as $system) {
     writeLog("DEBUG","Accesstoken: $accessToken");
     
     // API-endpint
+    $system["baseurl"] = preg_replace('/^https?:\/\//', '', $system["baseurl"]);
     $apiUrl = "https://".$system["baseurl"]."/api/v1/IntegrationRuntimeArtifacts?\$format=json";
     writeLog("INFO","Read Runtime Integration Artifacts");
     
@@ -175,13 +206,6 @@ foreach($config as $system) {
     $formattedJson = json_encode(json_decode($apiResponse, true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     $filePath = $directory . "/response_".$timestamp."_".$system["system"]."_Runtime.json";
     
-    // Save API response
-    if (saveDetails) {
-        file_put_contents($filePath, $formattedJson);
-        echo "Daten erfolgreich gespeichert: $filePath\n";
-        writeLog("DEBUG","Read Runtime Integration Artifacts - Data saved");
-    }
-    
     // JSON in ein PHP-Array umwandeln
     $data = json_decode($formattedJson, true);
     
@@ -190,6 +214,30 @@ foreach($config as $system) {
         writeLog("DEBUG","Read Runtime Integration Artifacts - No Results found");
         die("No Results found.\n");
     }
+    
+    // Save API response, Runtime
+    if (saveDetails) {
+        if (strtolower(OUTPUT_FORMAT) == "json") {
+            file_put_contents($filePath, $formattedJson);
+            echo "Daten erfolgreich gespeichert: $filePath\n";
+            writeLog("DEBUG","Read Runtime Integration Artifacts - Data saved");
+        }
+    }
+
+    
+    if (strtolower(OUTPUT_FORMAT) == "db") {
+        foreach ($data['d']['results'] as $item) {
+        
+            $insert = "insert into v_IntegrationRuntimeArtifacts\n" .
+                "(`owner`, `system`, `objId`, `Version`, `Name`, `Type`, `DeployedBy`, `DeployedOn`, `Status`".
+                ") values \n".
+                "('".$system["owner"]."','".$system["system"]."','".$item['Id']."','".$item['Version']."','".$item['Name']."','".$item['Type']."','".$item['DeployedBy']."','".$item['DeployedOn']."','".$item['Status']."'".
+                ")\n";
+            executeQuery($insert);
+            
+        }
+    }
+   
     
     // Check results and store results in an array
     $resultsArray = [];
@@ -225,12 +273,29 @@ foreach($config as $system) {
     // JSON formatieren
     $formattedJson = json_encode(json_decode($apiResponse, true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     
-    // save API respnse
+    // save API response
     if (saveDetails) {
-        $filePath = $directory . "/response_".$timestamp."_".$system["system"]."_Designtime.json";
-        file_put_contents($filePath, $formattedJson);
-        echo "Daten erfolgreich gespeichert: $filePath\n";
+        
+        if (strtolower(OUTPUT_FORMAT) == "json") {
+            $filePath = $directory . "/response_".$timestamp."_".$system["system"]."_Designtime.json";
+            file_put_contents($filePath, $formattedJson);
+            echo "Daten erfolgreich gespeichert: $filePath\n";
+        }
     }
+    
+    if (strtolower(OUTPUT_FORMAT) == "db") {
+        foreach ($data['d']['results'] as $item) {
+            
+            $insert = "insert into v_IntegrationPackages\n" .
+                "(`owner`, `system`, `objId`".
+                ") values \n".
+                "('".$system["owner"]."','".$system["system"]."','".$item['Id']."'".
+                ")\n";
+            executeQuery($insert);
+            
+        }
+    }
+   
     
     //Read single artifacts
     $data = json_decode($formattedJson, true);
@@ -264,19 +329,24 @@ foreach($config as $system) {
              
              // Save API-response
              if (saveDetails) {
-                $filePath = $directory . "/response_".$timestamp."_".$system["system"]."_Designtime_".$item["Id"]."_".$artifact.".json";
-                file_put_contents($filePath, $formattedJson);
+                 
+                 if (strtolower(OUTPUT_FORMAT) == "json") {
+                     $filePath = $directory . "/response_".$timestamp."_".$system["system"]."_Designtime_".$item["Id"]."_".$artifact.".json";
+                    file_put_contents($filePath, $formattedJson);
                 
-                if (LOG_LEVEL == "DEBUG") {
-                    echo "Data saved: $filePath\n";
-                }
+                    if (LOG_LEVEL == "DEBUG") {
+                        echo "Data saved: $filePath\n";
+                    }
+                 }
+                 
+                 
              }
              
              foreach ($message['d']['results'] as $actual_item) {
                
                   if ($actual_item["Version"] == "Active") {
                       
-                      //Request last version
+                      // Request last version
                       $apiUrl = $actual_item["__metadata"]["uri"];
                       
                       // API-request with Token
@@ -287,22 +357,36 @@ foreach($config as $system) {
                       ]));
                       
                       if (saveDetails) {
-                        $outputFilePath = "data/".sprintf('%04s', $run_id)."/response_".$timestamp."_".$system["system"]."_".$actual_item["Id"]."_active_result.xml";
-                        file_put_contents($outputFilePath, $activeApiResponse);
-                        if (LOG_LEVEL == "DEBUG") {
-                            echo "Data saved: $outputFilePath\n";
-                        }
+                          if (strtolower(OUTPUT_FORMAT) == "json") {
+                              $outputFilePath = "data/" . sprintf('%04s', $run_id) . "/response_" . $timestamp . "_" . $system["system"] . "_" . $actual_item["Id"] . "_active_result.xml";
+                              file_put_contents($outputFilePath, $activeApiResponse);
+                              if (LOG_LEVEL == "DEBUG") {
+                                  echo "Data saved: $outputFilePath\n";
+                              }
+                          }
                       }
                       
-                      // Transform XML in a SimpleXMLElement object
+                      // Transform XML into a SimpleXMLElement object
                       $xml = simplexml_load_string($activeApiResponse, "SimpleXMLElement", LIBXML_NOCDATA);
                       
-                      // define namespaces according XML
-                      $namespaces = $xml->getNamespaces(true);
+                      if ($xml === false) {
+                          // Error handling if parsing fails
+                          die("Failed loading XML: " . implode(", ", libxml_get_errors()));
+                      }
                       
-                      // Use corret namespace to request version
-                      $properties = $xml->children($namespaces['m'])->properties->children($namespaces['d']);
-                      $version = (string)$properties->Version;
+                      // Define namespaces according to XML
+                      $xml->registerXPathNamespace('default', 'http://www.w3.org/2005/Atom');
+                      $xml->registerXPathNamespace('m', 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata');
+                      $xml->registerXPathNamespace('d', 'http://schemas.microsoft.com/ado/2007/08/dataservices');
+                      
+                      // Extract properties and version using the correct namespaces
+                      $properties = $xml->xpath('//m:properties/d:Version');
+                      if (!empty($properties)) {
+                          $version = (string)$properties[0];
+                      } else {
+                          $version = "Unknown"; // Fallback in case no version is found
+                      }
+                      
                       $status = "Active";
                       
                   } else {
@@ -350,27 +434,42 @@ foreach($config as $system) {
                           //'Runtime_DeployedBy' => $item['DeployedBy'],
                           //'Runtime_DeployedOn' => $item['DeployedOn'],
                           //'Runtime_Status' => $item['Status'],
-                          'Designtime_Status' => $status,
+                          'Designtime_c' => $status,
                       ];
                       
                       // Store entry in the array
                       $resultsArray[$id] = $newEntry;
                   }
                   
-                  
-                  
-             
+                  //Write Data to DB
+                  if (strtolower(OUTPUT_FORMAT) == "db") {
+                      $insert = "insert into v_IntegrationDesigntimeArtifacts\n" .
+                          "(`owner`, `system`, `objId`, `Name`, `Version`, `PackageId`, `Type`, `Status`".
+                          ") values \n".
+                          "('".$system["owner"]."','".$system["system"]."','".$actual_item['Id']."','".$actual_item['Name']."','".$version."','".$package."','".$artifact."','".$status."'".
+                          ")\n";
+                      executeQuery($insert);
+                      
+           
+                      
+                  }
               }
-             
-             
+
          }
         }
     }
     
     // Save Results
-    $outputFilePath = "data/".sprintf('%04s', $run_id)."/parsed_results_".$system["system"].".json";
-    file_put_contents($outputFilePath, json_encode($resultsArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    echo "Analyze Data saved: $outputFilePath\n";
+    if (strtolower(OUTPUT_FORMAT) == "json") {
+        $outputFilePath = "data/".sprintf('%04s', $run_id)."/parsed_results_".$system["system"].".json";
+        file_put_contents($outputFilePath, json_encode($resultsArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        echo "Analyze Data saved: $outputFilePath\n";
+        
+        //Run ID only to be increased in case of JSON export
+        increaseRunID($run_id);
+        
+    }
+    
     
     if (LOG_LEVEL == "DEBUG") {
         $outputFilePath = "data/".sprintf('%04s', $run_id)."/parsed_urls_".$system["system"]."json";
@@ -380,7 +479,6 @@ foreach($config as $system) {
     
 }
 
-increaseRunID($run_id);
 writeLog("INFO","Processing finished");
 
 
@@ -439,9 +537,78 @@ function increaseRunID($run_id) {
 }
 
 
+function getDbConnection() {
+    
+    $host = DB_SETTINGS["host"];
+    $port = DB_SETTINGS["port"];
+    $dbname = DB_SETTINGS["dbname"];
+    $username = DB_SETTINGS["username"];
+    $password = DB_SETTINGS["password"];
+    
+    try {
+        
+        $pdo = new PDO(
+            "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8",
+            $username,
+            $password,
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_PERSISTENT => true, // Persistente Verbindung
+                PDO::ATTR_TIMEOUT => 5       // Timeout in Sekunden
+            ]
+            );
+        
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Fehler als Exceptions
+        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC); // Fetch-Modus
+        return $pdo;
+        
+    } catch (PDOException $e) {
+        writeLog("ERROR", "Database connection failed: " . $e->getMessage());
+        die("Database connection failed: " . $e->getMessage());
+    }
+}
 
+function executeQuery($sql, $parameters = [], $fetchMode = PDO::FETCH_ASSOC) {
+    
+    static $pdo = null;
+    
+    if ($pdo === null) {
+        try {
+            $pdo = getDbConnection();
+          
+        } catch (PDOException $e) {
+            writeLog("ERROR", "Database connection failed: " . $e->getMessage());
+            die("Database connection failed: " . $e->getMessage());
+        }
+    }
+    
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($parameters);
+        return $stmt; // Gibt das Statement zurück für weitere Verarbeitung
+    } catch (PDOException $e) {
+        writeLog("ERROR", "Query execution failed: " . $e->getMessage());
+        echo("Query execution failed: " . $e->getMessage());
+        echo("\n");
+        echo($sql);
+        writeLog("DEBUG", $sql);
+        exit(1);
+    }
+    
+}
 
-
+function validateDbSettings() {
+    
+    $requiredKeys = ["host", "dbname", "username"];
+    foreach ($requiredKeys as $key) {
+        if (!isset(DB_SETTINGS[$key]) || empty(DB_SETTINGS[$key])) {
+            writeLog("ERROR", "Database configuration error: Missing $key in DB_SETTINGS");
+            die("Database configuration error: Missing $key in DB_SETTINGS");
+        }
+    }
+    
+}
 
 
 ?>

@@ -19,65 +19,74 @@ import java.util.Map
 import java.util.Iterator
 import javax.activation.DataHandler
 
+import org.osgi.framework.FrameworkUtil
+import org.osgi.framework.ServiceReference
+import org.apache.camel.CamelContext
+
 import com.sap.gateway.ip.core.customdev.util.Message;
 
 // -----------------------------------------------------------
 // Call Methods
 // -----------------------------------------------------------
 def Message processData(Message message) {
-    log("Default", message, true, true, true, true, "ALL");
+    log("Default", message, true, true, true, true, false, "ALL");
     return message
 }
 
 def Message logHeaderandProperties(Message message) {
-    log("Header_and_Properties", message, false, true, true, true, "ALL");
+    log("Header_and_Properties", message, false, true, true, true,  false, "ALL");
+    return message
+}
+
+def Message logCamelEnvironment(Message message) {
+    log("Camel_Environment", message, false, false, false, false,  true, "DEBUG");
     return message
 }
 
 def Message payload_logger_after_mapping(Message message) {
-    log("After_Mapping", message, true, false, false, false, "DEBUG");
+    log("After_Mapping", message, true, false, false, false,  false, "DEBUG");
     return message
 }
 
 def Message payload_logger_before_mapping(Message message) {
-    log("Before_Mapping", message, true, false, false, false, "DEBUG");
+    log("Before_Mapping", message, true, false, false, false,  false, "DEBUG");
     return message
 }
 
 def Message payload_source(Message message) {
-    log("Source", message, true, true, true, true, "ALL");
+    log("Source", message, true, true, true, true,  false, "ALL");
     return message
 }
 
 def Message payload_redirect(Message message) {
-    log("Redirect Message", message, true, true, true, true, "ERROR");
+    log("Redirect Message", message, true, true, true, true,  false, "ERROR");
     return message
 }
 
 def Message payload_response(Message message) {
-    log("Response", message, true, true, true, true, "INFO");
+    log("Response", message, true, true, true, true,  false, "INFO");
     return message
 }
 
 def Message payload_sent(Message message) {
-    log("Sent Message", message, true, false, false, false, "INFO");
+    log("Sent Message", message, true, false, false, false,  false, "INFO");
     return message
 }
 
 def Message log_Info(Message message) {
-    log("Info", message, true, false, false, false, "INFO");
+    log("Info", message, true, false, false, false,  false, "INFO");
     return message
 }
 
 def Message logExceptionMessage(Message message) {
-   log("Exception", message, true, false, false, false, "ALL");
+   log("Exception", message, true, false, false, false,  false, "ALL");
     return message
 }
 
 // -----------------------------------------------------------
 // Main
 // -----------------------------------------------------------
-def Message log(String prefix, Message message,boolean logPayload, boolean logHeaders, boolean logProperties, boolean logSysEnv, String logLevel = "") {
+def Message log(String prefix, Message message,boolean logPayload, boolean logHeaders, boolean logProperties, boolean logSysEnv, boolean logCamelEnv, String logLevel = "") {
 
     // Define Log Lecels
     def levelMap = [:]
@@ -151,16 +160,21 @@ def Message log(String prefix, Message message,boolean logPayload, boolean logHe
             logInfo.append(logMessageHeaders(message));
         } 
 
-        //Prepare contentm Property Log
+        //Prepare content Property Log
         if(logProperties) {
             logInfo.append(logMessageProperties(message));
         } 
 
-        //Prepare contentm Property Log
+        //Prepare content System / Tenant environment
         if(logSysEnv) {
             logInfo.append(logSystemEnvironment(message));
         } 
-
+        
+       //Prepare Camel environment
+        if(logCamelEnv) {
+            logInfo.append(logMessageCamel(message));
+        }         
+        
         def body = message.getBody(java.lang.String) as String;
 
         if(logPayload) {
@@ -286,6 +300,42 @@ def String logMessageProperties(Message message) {
     
 }
 
+def String logMessageCamel(Message message) {
+    
+    def headers = message.getHeaders();
+    StringBuffer camelInfo = new StringBuffer()
+
+    def bundleCtx = FrameworkUtil.getBundle(Class.forName("com.sap.gateway.ip.core.customdev.util.Message")).getBundleContext();
+    ServiceReference[] srs = bundleCtx.getServiceReferences(CamelContext.class.getName(), null);
+
+    if (srs && srs.length > 0) {
+        
+        // Den ersten verfügbaren CamelContext abrufen
+        CamelContext camelContext = (CamelContext) bundleCtx.getService(srs[0])
+
+        if (camelContext) {
+
+            camelInfo.append("CamelContext Details:\n")
+            camelInfo.append("----------------------------\n")
+        
+            // Attributes of CamelContext
+            camelInfo.append("camelContext.getName: " + camelContext.getName() + "\n")
+            camelInfo.append("camelContext.getVersion: " + camelContext.getVersion() + "\n")
+            camelInfo.append("camelContext.getStatus: " + camelContext.getStatus() + "\n")
+            camelInfo.append("camelContext.getUptim: " + camelContext.getUptime() + "\n")
+            
+            // Further important Parameter
+            camelInfo.append("camelContext.getRegistry: " + camelContext.getRegistry() + "\n")
+            camelInfo.append("Routes: " + camelContext.getRoutes().size() + "\n") 
+
+        }    
+    }    
+
+    camelInfo.append("\n")
+    
+    return camelInfo.toString()
+    
+}
 
 def String logSystemEnvironment(Message message) {
     
@@ -381,4 +431,3 @@ def Message select_attachment(Message message) {
    return message
    
 }
-

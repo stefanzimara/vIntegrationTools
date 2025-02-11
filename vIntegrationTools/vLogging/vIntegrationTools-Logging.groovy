@@ -154,7 +154,21 @@ def Message log(String prefix, Message message,boolean logPayload, boolean logHe
 
         //Note LogeLevel
         def flowLogLevel = message.getProperty("SAP_MPL_LogLevel_Overall");
-    
+        def useFlowSeverity = properties.get("log.useFlowSeverity", "false").toUpperCase();
+        def personalLogLevel = properties.get("log.severity", "ALL").toUpperCase();
+        
+        // Which Severity Setting should be used?
+        def activeLogLevel = (useFlowSeverity == "TRUE") ? flowLogLevel : personalLogLevel
+        
+        // if nothing is defined
+        activeLogLevel = activeLogLevel ?: "ALL"
+        
+        // Check if Logging should be done 
+        if (levelMap[logLevel] < levelMap[activeLogLevel]) {
+            return message;
+        }
+        
+        
         //Prepare content, Header Log
         if(logHeaders) {
             logInfo.append(logMessageHeaders(message));

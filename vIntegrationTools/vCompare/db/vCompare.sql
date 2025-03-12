@@ -24,7 +24,8 @@ CREATE TABLE `v_IntegrationPackages` (
   `id` int(11) NOT NULL,
   `owner` varchar(80) NOT NULL,
   `system` varchar(60) NOT NULL,
-  `objId` varchar(255) NOT NULL
+  `objId` varchar(255) NOT NULL,
+  `Name` VARCHAR(255) NULL 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

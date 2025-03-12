@@ -1,0 +1,28 @@
+@charset "UTF-8";
+
+.vc-pointer {
+	cursor: pointer;
+}
+
+#dynamic-alert {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050; /* Über anderen Inhalten */
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.vc-icon-fixed {
+  width: 30px; /* Adjust width as needed */
+  display: inline-block;
+  text-align: center;
+}
+
+.vc-card-header {
+    background-color: #f8f8f8;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid #f8f8f8 !important;
+}

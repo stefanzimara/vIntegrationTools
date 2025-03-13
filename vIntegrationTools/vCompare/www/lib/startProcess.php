@@ -111,7 +111,15 @@ if (!$phpPath) {
 }
     
 //$cmd = "$phpPath backgroundProcess.php " . escapeshellarg($processId) . " > /dev/null 2> /tmp/bg_error_{$processId}.txt &";
-$cmd = "$phpPath backgroundProcess.php " . escapeshellarg($processId) . " > /dev/null 2> /dev/null 2>&1 &";
+//$cmd = "$phpPath backgroundProcess.php " . escapeshellarg($processId) . " > /dev/null 2> /dev/null 2>&1 &";
+
+$cmd = "$phpPath ../../readArtifacts.php -c ../../vnexus " . escapeshellarg($processId) . " > /tmp/bg_error_{$processId}.txt 2>&1 &";
+$message = "";
+
+if (file_exists("../../readArtifacts.php")) {
+    $message = "readArtifacts.php found";
+}
+
 exec($cmd, $output, $return_var);
 
 
@@ -123,6 +131,7 @@ echo json_encode([
     "statusFile" => $statusFile,
     "outputCmd" => $output,
     "statusCmd" => $return_var,
+    "comments" => $cmd,
 ]);
 exit;
 

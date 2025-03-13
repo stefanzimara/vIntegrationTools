@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Erstellungszeit: 12. Mrz 2025 um 12:52
+-- Erstellungszeit: 13. Mrz 2025 um 11:36
 -- Server-Version: 5.7.39
 -- PHP-Version: 7.4.33
 
@@ -63,30 +63,6 @@ CREATE TABLE `vcompare_galenica_v` (
 ,`designtime_OC_QualityAssurance_status` varchar(20)
 ,`runtime_OC_QualityAssurance_version` varchar(80)
 ,`runtime_OC_QualityAssurance_status` varchar(40)
-);
-
--- --------------------------------------------------------
-
---
--- Stellvertreter-Struktur des Views `vcompare_global_it_v`
--- (Siehe unten für die tatsächliche Ansicht)
---
-CREATE TABLE `vcompare_global_it_v` (
-`owner` varchar(60)
-,`objId` varchar(255)
-,`name` varchar(255)
-,`designtime_DEV_version` varchar(80)
-,`designtime_DEV_status` varchar(20)
-,`runtime_DEV_version` varchar(80)
-,`runtime_DEV_status` varchar(40)
-,`designtime_PROD_version` varchar(80)
-,`designtime_PROD_status` varchar(20)
-,`runtime_PROD_version` varchar(80)
-,`runtime_PROD_status` varchar(40)
-,`designtime_QAS_version` varchar(80)
-,`designtime_QAS_status` varchar(20)
-,`runtime_QAS_version` varchar(80)
-,`runtime_QAS_status` varchar(40)
 );
 
 -- --------------------------------------------------------
@@ -229,15 +205,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 DROP TABLE IF EXISTS `vcompare_galenica_v`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vcompare_galenica_v`  AS SELECT `artifacts`.`owner` AS `owner`, `artifacts`.`objId` AS `objId`, `artifacts`.`name` AS `name`, max((case when (`artifacts`.`system` = 'OC Development') then `artifacts`.`designtime_version` else NULL end)) AS `designtime_OC_Development_version`, max((case when (`artifacts`.`system` = 'OC Development') then `artifacts`.`designtime_status` else NULL end)) AS `designtime_OC_Development_status`, max((case when (`artifacts`.`system` = 'OC Development') then `artifacts`.`runtime_version` else NULL end)) AS `runtime_OC_Development_version`, max((case when (`artifacts`.`system` = 'OC Development') then `artifacts`.`runtime_status` else NULL end)) AS `runtime_OC_Development_status`, max((case when (`artifacts`.`system` = 'OC Production') then `artifacts`.`designtime_version` else NULL end)) AS `designtime_OC_Production_version`, max((case when (`artifacts`.`system` = 'OC Production') then `artifacts`.`designtime_status` else NULL end)) AS `designtime_OC_Production_status`, max((case when (`artifacts`.`system` = 'OC Production') then `artifacts`.`runtime_version` else NULL end)) AS `runtime_OC_Production_version`, max((case when (`artifacts`.`system` = 'OC Production') then `artifacts`.`runtime_status` else NULL end)) AS `runtime_OC_Production_status`, max((case when (`artifacts`.`system` = 'OC QualityAssurance') then `artifacts`.`designtime_version` else NULL end)) AS `designtime_OC_QualityAssurance_version`, max((case when (`artifacts`.`system` = 'OC QualityAssurance') then `artifacts`.`designtime_status` else NULL end)) AS `designtime_OC_QualityAssurance_status`, max((case when (`artifacts`.`system` = 'OC QualityAssurance') then `artifacts`.`runtime_version` else NULL end)) AS `runtime_OC_QualityAssurance_version`, max((case when (`artifacts`.`system` = 'OC QualityAssurance') then `artifacts`.`runtime_status` else NULL end)) AS `runtime_OC_QualityAssurance_status` FROM (select `v_integrationdesigntimeartifacts`.`owner` AS `owner`,`v_integrationdesigntimeartifacts`.`system` AS `system`,`v_integrationdesigntimeartifacts`.`objId` AS `objId`,`v_integrationdesigntimeartifacts`.`Name` AS `name`,`v_integrationdesigntimeartifacts`.`Version` AS `designtime_version`,`v_integrationdesigntimeartifacts`.`Status` AS `designtime_status`,NULL AS `runtime_version`,NULL AS `runtime_status` from `v_integrationdesigntimeartifacts` where (`v_integrationdesigntimeartifacts`.`owner` = 'Galenica') union all select `v_integrationruntimeartifacts`.`owner` AS `owner`,`v_integrationruntimeartifacts`.`system` AS `system`,`v_integrationruntimeartifacts`.`objId` AS `objId`,`v_integrationruntimeartifacts`.`Name` AS `name`,NULL AS `designtime_version`,NULL AS `designtime_status`,`v_integrationruntimeartifacts`.`Version` AS `runtime_version`,`v_integrationruntimeartifacts`.`Status` AS `runtime_status` from `v_integrationruntimeartifacts` where (`v_integrationruntimeartifacts`.`owner` = 'Galenica')) AS `artifacts` GROUP BY `artifacts`.`owner`, `artifacts`.`objId`, `artifacts`.`name``name`  ;
-
--- --------------------------------------------------------
-
---
--- Struktur des Views `vcompare_global_it_v`
---
-DROP TABLE IF EXISTS `vcompare_global_it_v`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vcompare_global_it_v`  AS SELECT `artifacts`.`owner` AS `owner`, `artifacts`.`objId` AS `objId`, `artifacts`.`name` AS `name`, max((case when (`artifacts`.`system` = 'DEV') then `artifacts`.`designtime_version` else NULL end)) AS `designtime_DEV_version`, max((case when (`artifacts`.`system` = 'DEV') then `artifacts`.`designtime_status` else NULL end)) AS `designtime_DEV_status`, max((case when (`artifacts`.`system` = 'DEV') then `artifacts`.`runtime_version` else NULL end)) AS `runtime_DEV_version`, max((case when (`artifacts`.`system` = 'DEV') then `artifacts`.`runtime_status` else NULL end)) AS `runtime_DEV_status`, max((case when (`artifacts`.`system` = 'PROD') then `artifacts`.`designtime_version` else NULL end)) AS `designtime_PROD_version`, max((case when (`artifacts`.`system` = 'PROD') then `artifacts`.`designtime_status` else NULL end)) AS `designtime_PROD_status`, max((case when (`artifacts`.`system` = 'PROD') then `artifacts`.`runtime_version` else NULL end)) AS `runtime_PROD_version`, max((case when (`artifacts`.`system` = 'PROD') then `artifacts`.`runtime_status` else NULL end)) AS `runtime_PROD_status`, max((case when (`artifacts`.`system` = 'QAS') then `artifacts`.`designtime_version` else NULL end)) AS `designtime_QAS_version`, max((case when (`artifacts`.`system` = 'QAS') then `artifacts`.`designtime_status` else NULL end)) AS `designtime_QAS_status`, max((case when (`artifacts`.`system` = 'QAS') then `artifacts`.`runtime_version` else NULL end)) AS `runtime_QAS_version`, max((case when (`artifacts`.`system` = 'QAS') then `artifacts`.`runtime_status` else NULL end)) AS `runtime_QAS_status` FROM (select `v_integrationdesigntimeartifacts`.`owner` AS `owner`,`v_integrationdesigntimeartifacts`.`system` AS `system`,`v_integrationdesigntimeartifacts`.`objId` AS `objId`,`v_integrationdesigntimeartifacts`.`Name` AS `name`,`v_integrationdesigntimeartifacts`.`Version` AS `designtime_version`,`v_integrationdesigntimeartifacts`.`Status` AS `designtime_status`,NULL AS `runtime_version`,NULL AS `runtime_status` from `v_integrationdesigntimeartifacts` where (`v_integrationdesigntimeartifacts`.`owner` = 'global it') union all select `v_integrationruntimeartifacts`.`owner` AS `owner`,`v_integrationruntimeartifacts`.`system` AS `system`,`v_integrationruntimeartifacts`.`objId` AS `objId`,`v_integrationruntimeartifacts`.`Name` AS `name`,NULL AS `designtime_version`,NULL AS `designtime_status`,`v_integrationruntimeartifacts`.`Version` AS `runtime_version`,`v_integrationruntimeartifacts`.`Status` AS `runtime_status` from `v_integrationruntimeartifacts` where (`v_integrationruntimeartifacts`.`owner` = 'global it')) AS `artifacts` GROUP BY `artifacts`.`owner`, `artifacts`.`objId`, `artifacts`.`name``name`  ;
 
 -- --------------------------------------------------------
 

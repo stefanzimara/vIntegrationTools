@@ -36,6 +36,10 @@ $i = 1;
 require_once("settings.php");
 require_once("vCompare.main.php");
 
+writeLog("INFO","Skript called");
+
+echo "Start";
+
 // define Options
 $options = getopt("vhc:", ["version", "help", "config:"]);
 
@@ -109,6 +113,8 @@ if (isset($options['c']) || isset($options['config'])) {
         exit(1);
     }
 }
+
+writeLog("DEBUG","Config File - " . $configFile);
 
 //load config file    
 require_once $configFile;

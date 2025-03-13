@@ -24,7 +24,7 @@ const DB_SETTINGS = [
     'port' => '3306',
     'dbname' => 'v-001-compare',
     'username' => 'v-001-compare',
-    'password' => 'qijGud-tyrsob-kazru2'
+    'password' => '<myPassword>'
 ];
 
 //----- no Changes below that line

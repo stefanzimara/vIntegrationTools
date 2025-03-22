@@ -11,6 +11,7 @@ const authRouter = require('./authServer');  // <-- OAuth Server einbinden
 const http = require('http');
 const https = require('https');
 const app = express();
+const os = require('os');
 
 // 🛠️ Body Parser korrekt setzen
 app.use(bodyParser.urlencoded({ extended: false }));  // WICHTIG für Form-Daten
@@ -18,14 +19,46 @@ app.use(bodyParser.json());  // WICHTIG für JSON-Daten
 app.use(express.raw({ type: '*/*' }));  // 🔥 Stellt sicher, dass Binärdaten unverändert bleiben
 app.use('/oauth', authRouter);  // ✅ OAuth Server registrieren
 
+// 📌 Setze EJS als View-Engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// 📌 Statische Dateien (z. B. Bilder) bereitstellen
+app.use(express.static('public'));
+
 // Auto-Redirect HTTP → HTTPS
 app.use((req, res, next) => {
   if (config.server.enableHttps && req.protocol !== 'https') {
-      return res.redirect(`https://${req.headers.host}${req.url}`);
+	  writeLog('DEBUG', 'Redirect from http to https');
+      return res.redirect(`https://${req.hostname}:${config.server.httpsPort || 8443}${req.url}`);
   }
   next();
 });
 
+//Handling GET Request
+app.get('/', (req, res) => {
+  const networkInterfaces = os.networkInterfaces();
+  const serverIP = networkInterfaces['Ethernet'] || networkInterfaces['Wi-Fi'] || networkInterfaces['en0'];
+
+  const data = {
+      server_time: new Date().toISOString(),
+      server_ip: serverIP ? serverIP[0].address : 'Nicht verfügbar',
+      client_ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+      http_version: req.httpVersion,
+      request_method: req.method,
+      requested_url: req.originalUrl,
+      protocol: req.protocol,
+      browser_user_agent: req.headers['user-agent'],
+      referrer: req.headers['referer'] || 'Keine Referrer-Info',
+      encoding: req.headers['accept-encoding'],
+      language: req.headers['accept-language'],
+      cookies: req.cookies || {},
+      request_headers: req.headers
+  };
+
+  // 🔹 HTML-Seite mit Template rendern
+  res.render('info', { data })
+});
 
 function getConfig() {
   delete require.cache[require.resolve('./config.json')]; // Cache löschen

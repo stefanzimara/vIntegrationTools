@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vConnect</title>
+
+    <!-- Verlinkung der externen CSS-Datei -->
+    <link rel="stylesheet" href="/css/vConnect.css">
+
+
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; padding: 20px; background-color: #f4f4f4; }
+        h1 { color: #333; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #333; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .logo { display: block; margin: 0 auto; width: 150px; }
+
+        pre {
+    word-break: break-all; /* Erzwungener Umbruch bei langen Wörtern */
+    white-space: pre-wrap; /* Zeilenumbruch für lange Texte */
+    overflow-wrap: break-word; /* Alternative für besseren Umbruch */
+    max-width: 100%; /* Stellt sicher, dass der Container nicht überläuft */
+    background: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+}
+
+
+
+    </style>
+
+</head>
+<body>
+
+    <!-- Header-Bereich -->
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="https://www.valcoba.com" target="_blank">
+                <img src="/images/Valcobalogo.jpg">
+            </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Inhalt der Seite -->
+
+    <section id="vConnect">
+        <h2>vConnect</h2>
+        <div class="content-container">
+            <div class="left-column">
+            <p>vConnect is a lightweight integration solution that enables seamless 
+                file-based data exchange over HTTP. As a complement to the SAP Integration Suite,
+                it fills the gap where no native file adapter exists. vConnect allows businesses 
+                to transfer files via HTTP endpoints, serving as an alternative to sFTP or other 
+                traditional file transfer methods. This makes it ideal for scenarios requiring simple, 
+                secure, and efficient file-to-HTTP or HTTP-to-file integrations</p>
+        </div>
+
+        <div class="right-column">
+            <p>vConnect is part of the free and open-source <b>vIntegrationTools</b>, a collection of 
+                utilities designed to simplify SAP and cloud integrations. Developed to bridge gaps 
+                in standard integration capabilities, these tools provide flexible solutions for various use cases. 
+                vConnect and other components are available on GitHub, allowing businesses to leverage, 
+                customize, and contribute to the project. Explore more at:
+                <a href="https://github.com/stefanzimara/vIntegrationTools" target="_blank">🔗 [GitHub - vIntegrationTools]</a></p>
+        </div>
+    </section>
+
+    <section id="vConnect-status">
+        <h2>vConnect Status</h2>
+        <div class="content-container">
+            <div class="left-column">
+                <table> <tr><th>Eigenschaft</th><th>Wert</th></tr> <tr><td><b>Server-Zeit</b></td><td><%= data.server_time %></td></tr> <tr><td><b>Server-IP</b></td><td><%= data.server_ip %></td></tr> <tr><td><b>Client-IP</b></td><td><%= data.client_ip %></td></tr> <tr>
+                    <td><b>HTTP-Version</b></td><td><%= data.http_version %></td></tr>
+                    <tr><td><b>Request-Methode</b></td><td><%= data.request_method %></td></tr> <tr><td><b>Aufgerufene URL</b></td><td><%= data.requested_url %></td></tr> <tr><td><b>Protokoll</b></td><td><%= data.protocol %></td></tr> <tr><td><b>Browser / User-Agent</b></td><td><%= data.browser_user_agent %></td></tr> <tr><td><b>Referrer</b></td>
+                        <td><%= data.referrer %></td></tr> <tr><td><b>Encoding</b></td><td><%= data.encoding %></td></tr> <tr><td><b>Spracheinstellungen</b></td><td><%= data.language %></td></tr> </table>
+    
+            </div>
+
+             <div class="right-column">
+             <pre><%= JSON.stringify(data.request_headers, null, 2) %></pre>
+            </div>
+        </div>
+
+    </section>
+    
+    <section id="documentation">
+        <h2>Documentation</h2>
+
+        <div class="content-container">
+            <div class="left-column">
+                <p>
+                    <table>
+                    <thead>
+                    <tr>
+                    <th>Command</th>
+                    <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                    <td><code>npm install</code></td>
+                    <td>Installs all required dependencies</td>
+                    </tr>
+                    <tr>
+                    <td><code>npm start</code></td>
+                    <td>Starts the vConnect application</td>
+                    </tr>
+                    <tr>
+                    <td><code>npm stop</code></td>
+                    <td>Stops the running vConnect instance</td>
+                    </tr>
+                    <tr>
+                    <td><code>npm run restart</code></td>
+                    <td>Restarts the application</td>
+                    </tr>
+                    <tr>
+                    <td><code>npm run build</code></td>
+                    <td>Builds the application for production use</td>
+                    </tr>
+                    <tr>
+                    <td><code>npm run dev</code></td>
+                    <td>Starts vConnect in development mode</td>
+                    </tr>
+                    <tr>
+                    <td><code>docker-compose up -d</code></td>
+                    <td>Starts vConnect as a Docker container (detached)</td>
+                    </tr>
+                    <tr>
+                    <td><code>docker-compose down</code></td>
+                    <td>Stops and removes the Docker container</td>
+                    </tr>
+                    <tr>
+                    <td><code>pm2 start vconnect.js</code></td>
+                    <td>Starts vConnect using PM2 for process management</td>
+                    </tr>
+                    <tr>
+                    <td><code>pm2 stop vconnect</code></td>
+                    <td>Stops the vConnect instance managed by PM2</td>
+                    </tr>
+                    </tbody>
+                    </table>
+                    </p>
+            </div>
+            <div class="right-column">
+                <p><table>
+                    <thead>
+                    <tr>
+                    <th>Config Key</th>
+                    <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                    <td><code>PORT</code></td>
+                    <td>Defines the port on which vConnect runs (default: 3000)</td>
+                    </tr>
+                    <tr>
+                    <td><code>HTTP_ENDPOINT</code></td>
+                    <td>Specifies the HTTP endpoint for file uploads</td>
+                    </tr>
+                    <tr>
+                    <td><code>FILE_STORAGE_PATH</code></td>
+                    <td>Sets the local directory for storing uploaded files</td>
+                    </tr>
+                    <tr>
+                    <td><code>MAX_FILE_SIZE</code></td>
+                    <td>Limits the maximum upload size (e.g., 50MB)</td>
+                    </tr>
+                    <tr>
+                    <td><code>ALLOWED_EXTENSIONS</code></td>
+                    <td>Defines allowed file extensions (e.g., .csv, .xml, .json)</td>
+                    </tr>
+                    <tr>
+                    <td><code>LOG_LEVEL</code></td>
+                    <td>Sets the logging level (info, debug, error)</td>
+                    </tr>
+                    <tr>
+                    <td><code>AUTH_TOKEN</code></td>
+                    <td>Optional: Enables authentication for API requests</td>
+                    </tr>
+                    <tr>
+                    <td><code>DELETE_AFTER_PROCESSING</code></td>
+                    <td>Determines if files should be deleted after processing (true/false)</td>
+                    </tr>
+                    </tbody>
+                    </table>
+                     
+                    <p>For more details and advanced configuration, visit the <a href="https://github.com/stefanzimara/vIntegrationTools/wiki" target="_blank">GitHub Wiki</a>.</p>
+                    
+                </p>                    
+            </div>
+        </div>
+    </section>
+    
+    <section id="contact">
+        <h2>Valcoba</h2>
+        <div class="contact-grid">
+            <div class="contact-left">
+                <h3>About Valcoba</h3>
+                <p>If you would like to learn more about us and our services, please visit our homepage at 
+                    <a href="https://www.valcoba.com" target="_blank">Valcoba</a>.
+                </p>
+            </div>
+
+            <div class="contact-right">
+                <h3>Reach us on:</h3>
+                <div class="social-icons">
+                    <a href="mailto:sap@valcoba.com">
+                        <span class="at-symbol">@</span>
+                    </a>
+
+                    <a href="https://www.linkedin.com/company/valcoba/" target="_blank">
+                        <img src="/images/vli.svg" class="social-icon" alt="LinkedIn">
+                    </a>
+            
+                    <a href="https://www.facebook.com/valcoba.ag" target="_blank">
+                        <img src="/images/vfb.svg" class="social-icon" alt="Facebook">
+                    </a>
+            
+                    <a href="https://www.instagram.com/valcobaag/" target="_blank">
+                        <img src="/images/vin.svg" class="social-icon" alt="Instagram">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

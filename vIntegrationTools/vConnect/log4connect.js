@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Log-Verzeichnis sicherstellen
-const logDir = path.join(__dirname, 'log');
+const logDir = path.join(__dirname, './data/log');
 fs.mkdirSync(logDir, { recursive: true });
 
 // Log-Level Reihenfolge (von niedrig nach hoch)

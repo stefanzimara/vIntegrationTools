@@ -1,0 +1,101 @@
+{
+    "logLevel": "INFO",
+    "intervalCron": "*/10 * * * * *",
+    "server": {
+        "httpPort": 8080,
+        "httpsPort": 8443,
+        "enableHttps": false,
+        "ssl": {
+            "keyPath": "/etc/letsencrypt/live/deine-domain.com/privkey.pem",
+            "certPath": "/etc/letsencrypt/live/deine-domain.com/fullchain.pem"
+        }
+    },
+    "tasks": [
+        {
+            "name": "Task1",
+            "enabled": true,
+            "httpToFile": {
+                "enabled": true,
+                "targetPath": "./incoming/service1",
+                "authType": "basic"
+            },
+            "fileToHttp": {
+                "enabled": true,
+                "sourcePath": "./outgoing/service1",
+                "targetUrl": "https://mytarget/http/0002/02/v1/file2http",
+                "authType": "oauth",
+                "oauth": {
+                    "tokenUrl": "https://mytarget/oauth/token",
+                    "clientId": "clientid",
+                    "clientSecret": "clientsecret"
+                },
+                "postSendAction": "archive",
+                "includePatterns": [
+                    "*.txt",
+                    "*.log"
+                ],
+                "excludePatterns": [
+                    "ignore_*",
+                    "*.tmp"
+                ],
+                "archivePath": "./archive/service2",
+                "intervalCron": "*/30 * * * * *"
+            }
+        },
+        {
+            "name": "Task2",
+            "enabled": true,
+            "httpToFile": {
+                "enabled": true,
+                "targetPath": "./incoming/service2",
+                "authType": "oauth"
+            },
+            "fileToHttp": {
+                "enabled": false,
+                "sourcePath": "./outgoing/service2",
+                "targetUrl": "https://service2.api/upload",
+                "authType": "basic",
+                "basicAuth": {
+                    "username": "admin",
+                    "password": "geheimes-passwort"
+                },
+                "postSendAction": "delete",
+                "intervalCron": "*/30 * * * * *"
+            }
+        },
+        {
+            "name": "Task3",
+            "enabled": true,
+            "httpToFile": {
+                "enabled": true,
+                "targetPath": "./incoming/service1",
+                "onConflict": "error"
+            },
+            "fileToHttp": {
+                "enabled": false
+            }
+        }
+    ],
+    "oauthServer": {
+        "secretKey": "vConnectSecretKey",
+        "clients": [
+            {
+                "clientId": "test-client",
+                "clientSecret": "geheimes-passwort",
+                "scope": "upload",
+                "expiresIn": 3600,
+                "allowedTasks": ["Task1", "Task2"]
+            }
+        ]
+    },
+    "basicAuth": {
+        "admin": {
+            "password": "geheim",
+            "allowedTasks": ["Task1", "Task3"]  
+        },
+        "user123": {
+            "password": "testpasswort",
+            "allowedTasks": ["Task2"]  
+        }
+    }
+}

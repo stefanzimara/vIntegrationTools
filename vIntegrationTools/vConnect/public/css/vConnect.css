@@ -1,0 +1,146 @@
+/* Allgemeine Stile für die Seite */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #FFA500;
+    margin: 0;
+    padding: 0;
+}
+
+/* Abschnitts-Stile für den Container */
+.content-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;  /* 2 Spalten mit gleicher Breite */
+    gap: 20px; /* Abstand zwischen den Spalten */
+
+}
+
+/* Stile für jede Spalte */
+.left-column, .right-column {
+    background-color: #ffffff;  /* Leichte Hintergrundfarbe für die Spalten */
+    border-radius: 8px;  /* Abgerundete Ecken */
+    padding: 20px;
+    text-align: justify;
+}
+
+/* Logo Styling */
+.logo img {
+    padding-left: 10px;
+    margin-left: 10px;
+    height: 35px; /* Größe des Logos */
+    width: auto;
+}
+
+h1, h2, h3 {
+    color: #0073e6; /* Blaue Farbe für Überschriften */
+    padding: 0;
+    margin: 0;
+}
+
+p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #000000; /* Dunkle Textfarbe für den Fließtext */
+}
+
+a {
+    color: #FFA500; /* Blaue Farbe für Links */
+    text-decoration: none; /* Entfernt die Unterstreichung */
+}
+
+a:hover {
+    text-decoration: underline; /* Unterstreicht Links bei Hover */
+}
+
+
+/* Header-Stile */
+header {
+    background-color: #ffffff; /* Dunkler Hintergrund für den Header */
+    color: rgb(0, 0, 0); /* Weiße Schrift im Header */
+    padding: 20px 0;
+    text-align: center;
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+}
+
+/* Navigation */
+nav ul {
+    list-style-type: none; /* Keine Aufzählungszeichen */
+    padding: 0;
+}
+
+/* Abschnitts-Stile */
+section {
+    padding: 20px;
+    margin: 20px;
+    background-color: white;
+    border-radius: 8px; /* Abgerundete Ecken für Abschnitte */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Schatten für Abschnitte */
+}
+
+section h2 {
+    margin-top: 0; /* Verhindert zusätzlichen Abstand oben */
+    color: #FFA500; /* Blaue Farbe für Links */
+}
+
+
+/* ____________________________Kontakt______________________________________ */
+
+.contact-grid h3 {
+    margin-bottom: 5px; /* Kleiner Abstand unter der Überschrift */
+    color: #FFA500; /* Blaue Farbe für Links */
+}
+
+.contact-grid p {
+    margin: 5px 0; /* Verhindert große Abstände */
+    line-height: 1.4; /* Passt die Zeilenhöhe an */
+}
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* 3 gleich große Spalten */
+    gap: 20px; /* Abstand zwischen den Spalten */
+    padding: 20px;
+    align-items: start; /* Inhalte oben ausrichten */
+}
+
+.contact-left {
+    grid-column: 1 / 2; /* Kontakt-Text bleibt in der ersten Spalte */
+    text-align: left; /* Text in der Mitte ausrichten */
+}
+
+.contact-right {
+    text-align: right; /* Text in der Mitte ausrichten */
+    grid-column: 3 / 4; /* Rechte Spalte */
+    line-height: 1.6;
+}
+
+/* Optional: Stil für die Links */
+.contact-grid a {
+    color: #FFA500; /* LinkedIn Blau */
+    text-decoration: none;
+}
+
+.contact-grid a:hover {
+    text-decoration: underline;
+}
+
+.social-icon {
+    width: 30px;  /* Passt die Breite an */
+    height: auto; /* Beibehaltung des Seitenverhältnisses */
+    vertical-align: middle; /* Sorgt dafür, dass das Bild in der Zeile schön ausgerichtet ist */
+    margin-left: 5px; /* Kleiner Abstand zum Text */
+}
+
+.at-symbol {
+    display: inline; /* Stellt sicher, dass das @-Symbol nebeneinander mit dem Text steht */
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 5px; /* Etwas Abstand zum Text */
+    color: #000000; /* Blaue Farbe für Links */
+}
+

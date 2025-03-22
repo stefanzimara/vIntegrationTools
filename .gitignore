@@ -7,3 +7,7 @@ vIntegrationTools/vCompare/franke.config.php
 /vIntegrationTools/vConnect/incoming/service2
 vIntegrationTools/vConnect/config.json.backup
 vIntegrationTools/config.json.backup
+/vIntegrationTools/vConnect/data/log
+vIntegrationTools/vConnect/init-config.sh
+vIntegrationTools/vConnect/config.json
+vIntegrationTools/vConnect/config.json

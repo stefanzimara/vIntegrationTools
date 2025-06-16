@@ -363,12 +363,11 @@ function readArtifacts($config) {
             
             //Run ID only to be increased in case of JSON export
             increaseRunID($run_id);
+
+            if (LOG_LEVEL == "DEBUG") {
+                saveJsonToFile($outputFilePath, $urlArray);
+            }
         }
-        
-        if (LOG_LEVEL == "DEBUG") {
-            saveJsonToFile($outputFilePath, $urlArray);
-        }
-        
     }
     
 }
@@ -383,9 +382,26 @@ function ensureDirectoryExists($directory) {
 
 //Write JSON File
 function saveJsonToFile($filePath, $data) {
-    file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    try {
+        if ($filePath) {
+                
+                file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                writeLog("DEBUG",$filePath." created");
+
+            } else {
+
+                writeLog("ERROR","File path is not defined for JSON output.");
+            
+            }
+        
+    } catch (Exception $e) {
+        writeLog("ERROR","Failed to ensure directory exists: " . $e->getMessage());
+        return;
+    }
+
     
-    writeLog("DEBUG",$filePath." created");
+
 }
 
     
@@ -409,11 +425,13 @@ function writeLog($level, $message) {
         return; // Log level to low, no further processing
     }
     
-    // actual time
-    $date = new DateTime();
+
+    // TimeZone Europa/Berlin (MEZ / MESZ)
+    $date = new DateTime('now', new DateTimeZone('Europe/Berlin'));
     $timestamp = $date->format('Ymd H:i:s');
     $logDir = __DIR__ . '/log/' . $date->format('Y') . '/' . $date->format('m');
     $logFile = $logDir . '/' . $date->format('d') . '.log';
+
     
     // create log directory if nevversary
     if (!is_dir($logDir)) {
